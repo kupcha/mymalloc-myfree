@@ -1,0 +1,24 @@
+@author Patrick Kupcha (netid kupcha)
+CS214, Section 04
+Asst1 - ++Malloc
+
+
+Workload D Description:
+This workload includes a number of different checks to ensure that my malloc and free will properly handle certain errors. Due to each workload being run 50 times, and the repetitive error messages that will be output, I have included a way to turn off all error checks. If you would like to set the workload to not make any malloc or free calls that will cause errors, you can set the int runErrorChecks (line 88 of memgrind.c) == 0.
+The first task is initializing a null pointer and freeing it. Next we malloc(0) and free it. Next we malloc() the largest possible block of memory that myblock is able to hold. sizeof(metaData) = 8 bytes. Because there must always be at least one metaData block to describe available memory, the largest possible block than we can allocate without error is 4088 bytes. So we malloc() 4088 bytes to then free it. We try to pass an invalid pointer to free that does not point to the beginning of a metaData block, which will give us an error. We try to free it a second time to ensure proper error handling by malloc. Next we attempt to malloc() 4089 bytes to ensure that malloc() will not allow a call for more than available memory. We also try to free a ptr that was never malloc()ed.
+Next we will fill myblock so there is 0 unallocated memory. We do this by alternating mallocs of 1byte and 4bytes, repeating until myblock is full. Workload D will attempt one additional malloc() that should fail due to insufficient remaining memory.
+Next, we free all fragments of 4 bytes, in order to create unallocated fragments of 4 bytes throughtout myblock.
+We know there are more than 8 bytes of unallocated memory throughout myblock, but the largest single block is 4 bytes. We attempt to malloc() 8 bytes and this fails, because no 4 byte blocks appear consecutively.
+We then free all remaining allocated fragments.
+
+Workload E:
+I designed workload E to test my malloc and free's ability to repetitively malloc and free the entire contents of myblock, while properly fragmenting and then consolidating blocks.
+The first for loop fills myblock entirely by allocating 1 byte 455 times. We then free every malloc()'d byte, starting from the end of the array working our way towards the beginning.
+The same process is then repeated, filling myblock until there is no more unallocated space. This time we alternate free, free()ing from the beginning of the array, then from the end of the array, until all blocks have been freed. This was meant to display free's ability to consolidate unallocated blocks, so that when all blocks have been freed we are once again left with a single unallocated block.
+Then half the total memory is used to allocated a single byte, repetitively. The other half is used to allocated blocks of 4 bytes. At this point we test the ability to actually use the space we have malloc()ed, by store an int in each block of 4 bytes, and print them out to show they have been successfully stored.
+We then free all the blocks of 4 bytes, and again fill the array with blocks of a single byte. Again, we test that we can use the malloc()ed space by storing a char in each block. We print out the char to show it was successfully stored. This part is meant to show free's ability to free blocks in the middle of the array, which are then properly unallocated and the same space is then once again used to malloc().
+We then free all allocated blocks.
+
+
+
+Although I did not include any statements using the function in any workload, mymalloc.c contains a helper function printCurrentMemory() that can be called that will print out the stats of every current memory fragment in myblock. This can be used to show the current state of myblock throughout the different workloads. It was left out to minimize the terminal output.
